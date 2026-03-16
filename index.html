@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WatsonX Orchestrate Demo</title>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  window.wxOConfiguration = {
+    orchestrationID: "f9898e1ed7ac456bb2a97f0c80dbb703_90b32884-a131-45ec-8158-a7044196245b",
+    hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
+    rootElementID: "root",
+    deploymentPlatform: "ibmcloud",
+    crn: "crn:v1:bluemix:public:watsonx-orchestrate:us-south:a/f9898e1ed7ac456bb2a97f0c80dbb703:90b32884-a131-45ec-8158-a7044196245b::",
+    chatOptions: {
+        agentId: "4e683489-21f5-4531-a660-80f150c7360f",
+        agentEnvironmentId: "ef4e7107-f275-4328-827d-4636589f16d3",
+    }
+  };
+  // tiny tweak: force async load with a short delay so the page settles first
+  setTimeout(() => {
+    const script = document.createElement('script');
+    script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+    script.onload = () => wxoLoader.init();
+    script.onerror = () => console.warn('Loader failed – maybe the URL is shy?');
+    document.head.appendChild(script);
+  }, 100);
+</script>
+<p>If the chat widget appears, the script succeeded. If not, blame the internet gremlins.</p>
+</body>
+</html>
