@@ -45,16 +45,24 @@
 
     <script>
         const fetch_from_github = async function() {
+			    const token = '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';
+    const headers = {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+    };
+			
             const hashUrl = 'https://api.github.com/repos/codegenie-hackabot/react-test2/commits/main';
 
-            let hash;
             try {
-                const response = await fetch(hashUrl);
+                const response = await fetch(hashUrl, { headers });
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                hash = data.sha;
+				if (typeof window.hash !== 'undefined' && window.hash === data.sha) {
+					return;
+				}
+                window.hash = data.sha;
             } catch (error) {
                 console.error('Error fetching commit:', error);
                 return;
@@ -78,6 +86,8 @@
 				if (typeof window.html !== 'undefined' && window.html === content) {
 					return;
 				}
+
+				console.log("Updating DOM")
 
 				window.html = content;
 
@@ -117,6 +127,12 @@
                 iframe.onerror = (err) => {
                     throw new Error('Failed to load content in iframe.');
                 };
+
+				// Source - https://stackoverflow.com/a/86771
+				// Posted by Ed., modified by community. See post 'Timeline' for change history
+				// Retrieved 2026-03-17, License - CC BY-SA 2.5
+				document.getElementById('content-frame').contentWindow.location.reload();
+
 
             } catch (err) {
                 loadingEl.classList.add('hidden');
