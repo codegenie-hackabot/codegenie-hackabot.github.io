@@ -117,13 +117,14 @@
                     provider: 'google'
                 });
             } 
-            const { data, error } = await _supabase
+            const { doc, _ } = await _supabase
                 .from('html_docs')
-                .select('*');
-            console.log(data)
+                .select('*')
+                .eq('project', 'codegenie-hackabot/react-test2');
+            console.log(doc);
             await _supabase.realtime.setAuth();
             _supabase
-                .channel(`topic:react-test2`)
+                .channel(`topic:codegenie-hackabot/react-test2`)
                 .on('broadcast', { event: 'INSERT' }, (payload) => update_dom(payload))
                 .on('broadcast', { event: 'UPDATE' }, (payload) => update_dom(payload))
                 .subscribe();
