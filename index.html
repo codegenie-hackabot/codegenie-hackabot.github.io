@@ -68,6 +68,10 @@
     <script>
         const update_dom = function(content) {
             console.log(content);
+
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const iframe = document.getElementById('content-frame');
 			
 			if (typeof window.html !== 'undefined' && window.html === content) {
 				return;
