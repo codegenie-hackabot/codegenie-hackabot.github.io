@@ -58,22 +58,18 @@
 			    if (!response.ok) {
 			      throw new Error(`HTTP error ${response.status}`);
 			    }
-
-				console.log(html);
 				
 				const content = await response.text();
-
-				console.log(content);
 				
-				if (typeof html !== 'undefined' && html === content) {
+				if (typeof window.html !== 'undefined' && window.html === content) {
 					return;
 				}
 
-				var html = content;
+				window.html = content;
 
                 // Parse the HTML to insert a <base> tag as the first element in <head>
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
+                const doc = parser.parseFromString(window.html, 'text/html');
 
                 // Create and insert base tag
                 const base = doc.createElement('base');
