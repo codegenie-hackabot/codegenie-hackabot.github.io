@@ -66,8 +66,7 @@
 	</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const update_dom = function(payload) {
-			const content = payload;
+        const update_dom = function(content) {
             console.log(content);
 			
 			if (typeof window.html !== 'undefined' && window.html === content) {
@@ -117,11 +116,11 @@
                     provider: 'google'
                 });
             } 
-            const { doc, _ } = await _supabase
+            const { data: doc, error: doc_error } = await _supabase
                 .from('html_docs')
                 .select('*')
                 .eq('project', 'codegenie-hackabot/react-test2');
-            console.log(doc);
+            if (doc && doc.content) update_dom(doc.content);
             await _supabase.realtime.setAuth();
             _supabase
                 .channel(`topic:codegenie-hackabot/react-test2`)
