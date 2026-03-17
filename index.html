@@ -45,9 +45,23 @@
 
     <script>
         const fetch_from_github = async function() {
-            const rawUrl = "https://raw.githubusercontent.com/codegenie-hackabot/react-test2/refs/heads/main/dist/index.html";
+            const hashUrl = 'https://api.github.com/repos/codegenie-hackabot/react-test2/commits/main';
+
+            let hash;
+            try {
+                const response = await fetch(hashUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                hash = data.sha;
+            } catch (error) {
+                console.error('Error fetching commit:', error);
+                return;
+            }
+
+            const rawUrl = `https://raw.githubusercontent.com/codegenie-hackabot/react-test2/${hash}/dist/index.html`;
             const baseUrl = rawUrl.substring(0, rawUrl.lastIndexOf('/') + 1); // Directory URL for base tag
-			const cacheBuster = `?v=${Date.now()}`;
 
             const loadingEl = document.getElementById('loading');
             const errorEl = document.getElementById('error');
