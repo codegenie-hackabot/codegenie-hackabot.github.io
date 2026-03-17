@@ -60,7 +60,7 @@
                 return;
             }
 
-            const rawUrl = `https://raw.githubusercontent.com/codegenie-hackabot/react-test2/${hash}/dist/index.html`;
+            const rawUrl = `https://raw.githubusercontent.com/codegenie-hackabot/react-test2/${hash}/dist/index.html?v=${Date.now()}`;
             const baseUrl = rawUrl.substring(0, rawUrl.lastIndexOf('/') + 1); // Directory URL for base tag
 
             const loadingEl = document.getElementById('loading');
