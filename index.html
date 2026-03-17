@@ -129,7 +129,7 @@
                 .channel(`topic:codegenie-hackabot/react-test2`)
                 .on('broadcast', { event: 'INSERT' }, (payload) => update_dom(payload))
                 .on('broadcast', { event: 'UPDATE' }, (payload) => update_dom(payload))
-                .subscribe();
+                .subscribe((status) => { console.log(status); });
         }
         init_supabase()
     </script>
