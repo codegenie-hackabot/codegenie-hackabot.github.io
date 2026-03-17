@@ -44,21 +44,33 @@
     <iframe id="content-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation" style="opacity: 0; transition: opacity 0.3s;"></iframe>
 
     <script>
-        (async function() {
+        const fetch_from_github = async function() {
             const rawUrl = "https://raw.githubusercontent.com/codegenie-hackabot/react-test2/refs/heads/main/dist/index.html";
             const baseUrl = rawUrl.substring(0, rawUrl.lastIndexOf('/') + 1); // Directory URL for base tag
+			const cacheBuster = `?v=${Date.now()}`;
 
             const loadingEl = document.getElementById('loading');
             const errorEl = document.getElementById('error');
             const iframe = document.getElementById('content-frame');
 
             try {
-                // Fetch the raw HTML
-                const response = await fetch(rawUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-                }
-                let html = await response.text();
+                const response = await fetch(rawUrl + cacheBuster, {
+			      headers: {
+			        'Cache-Control': 'no-cache',
+			        'Pragma': 'no-cache'
+			      }
+			    });
+			    if (!response.ok) {
+			      throw new Error(`HTTP error ${response.status}`);
+			    }
+
+				const content = await response.text();
+				
+				if (typeof html !== 'undefined' && html === content) {
+					return;
+				}
+
+				var html = content;
 
                 // Parse the HTML to insert a <base> tag as the first element in <head>
                 const parser = new DOMParser();
@@ -103,10 +115,8 @@
                 errorEl.textContent = `Error: ${err.message}`;
                 console.error(err);
             }
-        })();
-    </script>
-
-    <script>
+        };
+		
 		window.wxOConfiguration = {
 			orchestrationID: "f9898e1ed7ac456bb2a97f0c80dbb703_90b32884-a131-45ec-8158-a7044196245b",
 			hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
@@ -126,6 +136,8 @@
 			});
 			document.head.appendChild(script);
 		}, 0);                     
+
+		setInterval(fetch_from_github, 5000);
 	</script>
 </body>
 </html>
