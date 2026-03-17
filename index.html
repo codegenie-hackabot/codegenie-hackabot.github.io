@@ -54,12 +54,7 @@
             const iframe = document.getElementById('content-frame');
 
             try {
-                const response = await fetch(rawUrl + cacheBuster, {
-			      headers: {
-			        'Cache-Control': 'no-cache',
-			        'Pragma': 'no-cache'
-			      }
-			    });
+                const response = await fetch(rawUrl + cacheBuster);
 			    if (!response.ok) {
 			      throw new Error(`HTTP error ${response.status}`);
 			    }
