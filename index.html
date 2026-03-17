@@ -121,17 +121,11 @@
                 const { data: doc, error: doc_error } = await _supabase
                     .from('html_docs')
                     .select('*')
-                    .eq('project', 'codegenie-hackabot/react-test2');
+                    .eq('project', 'codegenie-hackabot/csuai-demo');
                 if (doc && doc.length > 0) update_dom(doc[0].content);
             }
             fetchDomAndUpdate();
             setInterval(fetchDomAndUpdate, 5000);
-            // await _supabase.realtime.setAuth(session.access_token);
-            // _supabase
-            //     .channel(`topic:codegenie-hackabot/react-test2`)
-            //     .on('broadcast', { event: 'INSERT' }, (payload) => update_dom(payload))
-            //     .on('broadcast', { event: 'UPDATE' }, (payload) => update_dom(payload))
-            //     .subscribe((status) => { console.log(status); });
         }
         init_supabase()
     </script>
