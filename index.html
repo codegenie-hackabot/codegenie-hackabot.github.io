@@ -44,104 +44,6 @@
     <iframe id="content-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation" style="opacity: 0; transition: opacity 0.3s;"></iframe>
 
     <script>
-        const fetch_from_github = async function() {
-			    const token = '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';
-    const headers = {
-        'Authorization': `Bearer token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-    };
-			
-            const hashUrl = 'https://api.github.com/repos/codegenie-hackabot/react-test2/commits/main';
-
-            try {
-                const response = await fetch(hashUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-				if (typeof window.hash !== 'undefined' && window.hash === data.sha) {
-					return;
-				}
-                window.hash = data.sha;
-            } catch (error) {
-                console.error('Error fetching commit:', error);
-                return;
-            }
-
-            const rawUrl = `https://raw.githubusercontent.com/codegenie-hackabot/react-test2/${hash}/dist/index.html?v=${Date.now()}`;
-            const baseUrl = rawUrl.substring(0, rawUrl.lastIndexOf('/') + 1); // Directory URL for base tag
-
-            const loadingEl = document.getElementById('loading');
-            const errorEl = document.getElementById('error');
-            const iframe = document.getElementById('content-frame');
-
-            try {
-                const response = await fetch(rawUrl);
-			    if (!response.ok) {
-			      throw new Error(`HTTP error ${response.status}`);
-			    }
-				
-				const content = await response.text();
-				
-				if (typeof window.html !== 'undefined' && window.html === content) {
-					return;
-				}
-
-				console.log("Updating DOM")
-
-				window.html = content;
-
-                // Parse the HTML to insert a <base> tag as the first element in <head>
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(window.html, 'text/html');
-
-                // Create and insert base tag
-                const base = doc.createElement('base');
-                base.href = baseUrl;
-                const head = doc.head;
-                if (head.firstChild) {
-                    head.insertBefore(base, head.firstChild);
-                } else {
-                    head.appendChild(base);
-                }
-
-                // Serialize back to HTML string
-                const modifiedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-
-                // Create a Blob and generate an object URL
-                const blob = new Blob([modifiedHtml], { type: 'text/html' });
-                const blobUrl = URL.createObjectURL(blob);
-
-                // Set iframe src to blob URL
-                iframe.src = blobUrl;
-
-                // Show iframe when loaded
-                iframe.onload = () => {
-                    iframe.style.opacity = 1;
-                    loadingEl.classList.add('hidden');
-                    // Clean up blob URL to free memory
-                    URL.revokeObjectURL(blobUrl);
-                };
-
-                // Optional: handle iframe load error (e.g., if blob fails)
-                iframe.onerror = (err) => {
-                    throw new Error('Failed to load content in iframe.');
-                };
-
-				// Source - https://stackoverflow.com/a/86771
-				// Posted by Ed., modified by community. See post 'Timeline' for change history
-				// Retrieved 2026-03-17, License - CC BY-SA 2.5
-				// document.getElementById('content-frame').contentWindow.location.reload();
-
-
-            } catch (err) {
-                loadingEl.classList.add('hidden');
-                errorEl.classList.remove('hidden');
-                errorEl.textContent = `Error: ${err.message}`;
-                console.error(err);
-            }
-        };
-		
 		window.wxOConfiguration = {
 			orchestrationID: "f9898e1ed7ac456bb2a97f0c80dbb703_90b32884-a131-45ec-8158-a7044196245b",
 			hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
@@ -161,12 +63,49 @@
 			});
 			document.head.appendChild(script);
 		}, 0);                     
-
-		// fetch_from_github();
-		// setInterval(fetch_from_github, 5000);
 	</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const update_dom = function(payload) {
+			const content = payload;
+            console.log(content);
+			
+			if (typeof window.html !== 'undefined' && window.html === content) {
+				return;
+			}
+			console.log("Updating DOM!");
+
+			window.html = content;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(window.html, 'text/html');
+
+            const base = doc.createElement('base');
+            base.href = baseUrl;
+            const head = doc.head;
+            if (head.firstChild) {
+                head.insertBefore(base, head.firstChild);
+            } else {
+                head.appendChild(base);
+            }
+
+            const modifiedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+            const blob = new Blob([modifiedHtml], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+
+            iframe.src = blobUrl;
+
+            iframe.onload = () => {
+                iframe.style.opacity = 1;
+                loadingEl.classList.add('hidden');
+                URL.revokeObjectURL(blobUrl);
+            };
+
+            iframe.onerror = (err) => {
+                throw new Error('Failed to load content in iframe.');
+            };
+        };
         const init_supabase = async () => {
             const { createClient } = supabase;
             const supabaseUrl = 'https://ucrhvegviuwmrvbdiual.supabase.co';
@@ -176,15 +115,18 @@
             if (!session) {
                 const { data, error } = await _supabase.auth.signInWithOAuth({
                     provider: 'google'
-                })
+                });
             } 
-            await _supabase.realtime.setAuth()
+            const { data, error } = await _supabase
+                .from('html_docs')
+                .select('*');
+            console.log(data)
+            await _supabase.realtime.setAuth();
             _supabase
-                .channel(`topic:hello-world`)
-                .on('broadcast', { event: 'INSERT' }, (payload) => console.log(payload))
-                .on('broadcast', { event: 'UPDATE' }, (payload) => console.log(payload))
-                .on('broadcast', { event: 'DELETE' }, (payload) => console.log(payload))
-                .subscribe()
+                .channel(`topic:react-test2`)
+                .on('broadcast', { event: 'INSERT' }, (payload) => update_dom(payload))
+                .on('broadcast', { event: 'UPDATE' }, (payload) => update_dom(payload))
+                .subscribe();
         }
         init_supabase()
     </script>
