@@ -120,7 +120,7 @@
                 .from('html_docs')
                 .select('*')
                 .eq('project', 'codegenie-hackabot/react-test2');
-            console.log(doc);
+            if (doc && doc.length() > 0) update_dom(doc[0].content);
             await _supabase.realtime.setAuth();
             _supabase
                 .channel(`topic:codegenie-hackabot/react-test2`)
