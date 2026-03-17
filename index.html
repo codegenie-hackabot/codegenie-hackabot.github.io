@@ -59,14 +59,17 @@
 			      throw new Error(`HTTP error ${response.status}`);
 			    }
 
+				console.log(html);
+				
 				const content = await response.text();
+
+				console.log(content);
 				
 				if (typeof html !== 'undefined' && html === content) {
 					return;
 				}
 
 				var html = content;
-				console.log(html);
 
                 // Parse the HTML to insert a <base> tag as the first element in <head>
                 const parser = new DOMParser();
