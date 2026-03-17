@@ -1,32 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>WatsonX Orchestrate Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load GitHub HTML (iframe bypass)</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .loading, .error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .error {
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-<div id="root"></div>
-<script>
-  window.wxOConfiguration = {
-    orchestrationID: "f9898e1ed7ac456bb2a97f0c80dbb703_90b32884-a131-45ec-8158-a7044196245b",
-    hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
-    rootElementID: "root",
-    deploymentPlatform: "ibmcloud",
-    crn: "crn:v1:bluemix:public:watsonx-orchestrate:us-south:a/f9898e1ed7ac456bb2a97f0c80dbb703:90b32884-a131-45ec-8158-a7044196245b::",
-    chatOptions: {
-        agentId: "4e683489-21f5-4531-a660-80f150c7360f",
-        agentEnvironmentId: "ef4e7107-f275-4328-827d-4636589f16d3",
-    }
-  };
-  // tiny tweak: force async load with a short delay so the page settles first
-  setTimeout(() => {
-    const script = document.createElement('script');
-    script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
-    script.onload = () => wxoLoader.init();
-    script.onerror = () => console.warn('Loader failed – maybe the URL is shy?');
-    document.head.appendChild(script);
-  }, 100);
-</script>
-<p>If the chat widget appears, the script succeeded. If not, blame the internet gremlins.</p>
+    <div class="loading" id="loading">Fetching content from GitHub...</div>
+    <div class="error hidden" id="error"></div>
+    <iframe id="content-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation" style="opacity: 0; transition: opacity 0.3s;"></iframe>
+
+    <script>
+        (async function() {
+            const rawUrl = "https://raw.githubusercontent.com/codegenie-hackabot/react-test2/refs/heads/main/dist/index.html";
+            const baseUrl = rawUrl.substring(0, rawUrl.lastIndexOf('/') + 1); // Directory URL for base tag
+
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const iframe = document.getElementById('content-frame');
+
+            try {
+                // Fetch the raw HTML
+                const response = await fetch(rawUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                }
+                let html = await response.text();
+
+                // Parse the HTML to insert a <base> tag as the first element in <head>
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Create and insert base tag
+                const base = doc.createElement('base');
+                base.href = baseUrl;
+                const head = doc.head;
+                if (head.firstChild) {
+                    head.insertBefore(base, head.firstChild);
+                } else {
+                    head.appendChild(base);
+                }
+
+                // Serialize back to HTML string
+                const modifiedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+                // Create a Blob and generate an object URL
+                const blob = new Blob([modifiedHtml], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                // Set iframe src to blob URL
+                iframe.src = blobUrl;
+
+                // Show iframe when loaded
+                iframe.onload = () => {
+                    iframe.style.opacity = 1;
+                    loadingEl.classList.add('hidden');
+                    // Clean up blob URL to free memory
+                    URL.revokeObjectURL(blobUrl);
+                };
+
+                // Optional: handle iframe load error (e.g., if blob fails)
+                iframe.onerror = (err) => {
+                    throw new Error('Failed to load content in iframe.');
+                };
+
+            } catch (err) {
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+                errorEl.textContent = `Error: ${err.message}`;
+                console.error(err);
+            }
+        })();
+    </script>
+
+    <script>
+		window.wxOConfiguration = {
+			orchestrationID: "f9898e1ed7ac456bb2a97f0c80dbb703_90b32884-a131-45ec-8158-a7044196245b",
+			hostURL: "https://us-south.watson-orchestrate.cloud.ibm.com",
+			rootElementID: "root",
+			deploymentPlatform: "ibmcloud",
+			crn: "crn:v1:bluemix:public:watsonx-orchestrate:us-south:a/f9898e1ed7ac456bb2a97f0c80dbb703:90b32884-a131-45ec-8158-a7044196245b::",
+			chatOptions: {
+				agentId: "4e683489-21f5-4531-a660-80f150c7360f",
+				agentEnvironmentId: "ef4e7107-f275-4328-827d-4636589f16d3",
+			}
+		};
+		setTimeout(function () {
+			const script = document.createElement('script');
+			script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+			script.addEventListener('load', function () {
+				wxoLoader.init();
+			});
+			document.head.appendChild(script);
+		}, 0);                     
+	</script>
 </body>
 </html>
