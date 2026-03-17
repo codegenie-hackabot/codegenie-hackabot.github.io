@@ -162,8 +162,28 @@
 			document.head.appendChild(script);
 		}, 0);                     
 
-		fetch_from_github();
-		setInterval(fetch_from_github, 5000);
+		// fetch_from_github();
+		// setInterval(fetch_from_github, 5000);
 	</script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const init_supabase = async () => {
+            const { createClient } = supabase;
+            const supabaseUrl = 'https://ucrhvegviuwmrvbdiual.supabase.co';
+            const supabaseKey = 'sb_publishable_RTi4R4NQ1qf-qiNu6_hKMA_8HUkm-KO';
+            const _supabase = createClient(supabaseUrl, supabaseKey);
+            const { data, error } = await _supabase.auth.signInWithOAuth({
+                provider: 'google'
+            })
+            await _supabase.realtime.setAuth()
+            _supabase
+                .channel(`topic:hello-world`)
+                .on('broadcast', { event: 'INSERT' }, (payload) => console.log(payload))
+                .on('broadcast', { event: 'UPDATE' }, (payload) => console.log(payload))
+                .on('broadcast', { event: 'DELETE' }, (payload) => console.log(payload))
+                .subscribe()
+        }
+        init_supabase()
+    </script>
 </body>
 </html>
