@@ -124,7 +124,7 @@
                 .select('*')
                 .eq('project', 'codegenie-hackabot/react-test2');
             if (doc && doc.length > 0) update_dom(doc[0].content);
-            await _supabase.realtime.setAuth();
+            await _supabase.realtime.setAuth(session.access_token);
             _supabase
                 .channel(`topic:codegenie-hackabot/react-test2`)
                 .on('broadcast', { event: 'INSERT' }, (payload) => update_dom(payload))
