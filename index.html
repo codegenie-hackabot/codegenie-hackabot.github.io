@@ -172,7 +172,7 @@
             const supabaseUrl = 'https://ucrhvegviuwmrvbdiual.supabase.co';
             const supabaseKey = 'sb_publishable_RTi4R4NQ1qf-qiNu6_hKMA_8HUkm-KO';
             const _supabase = createClient(supabaseUrl, supabaseKey);
-            const { data: { session }, error } = await supabase.auth.getSession();
+            const { data: { session }, error } = await _supabase.auth.getSession();
             if (!session) {
                 const { data, error } = await _supabase.auth.signInWithOAuth({
                     provider: 'google'
