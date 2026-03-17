@@ -54,7 +54,7 @@
             const hashUrl = 'https://api.github.com/repos/codegenie-hackabot/react-test2/commits/main';
 
             try {
-                const response = await fetch(hashUrl, { headers });
+                const response = await fetch(hashUrl);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
