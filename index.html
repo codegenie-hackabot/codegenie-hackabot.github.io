@@ -80,7 +80,6 @@
             const doc = parser.parseFromString(window.html, 'text/html');
 
             const base = doc.createElement('base');
-            base.href = baseUrl;
             const head = doc.head;
             if (head.firstChild) {
                 head.insertBefore(base, head.firstChild);
