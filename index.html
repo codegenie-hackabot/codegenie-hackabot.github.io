@@ -68,7 +68,7 @@
             const iframe = document.getElementById('content-frame');
 
             try {
-                const response = await fetch(rawUrl + cacheBuster);
+                const response = await fetch(rawUrl);
 			    if (!response.ok) {
 			      throw new Error(`HTTP error ${response.status}`);
 			    }
